@@ -1,0 +1,5 @@
+[core]
+    remote = gcp_bucket
+    autostage = true
+['remote "gcp_bucket"']
+    url = gs://job_listings_bucket
