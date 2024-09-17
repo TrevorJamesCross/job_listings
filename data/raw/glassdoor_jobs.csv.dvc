@@ -1,0 +1,5 @@
+outs:
+- md5: 084553e38852a0caa223890cf485dce5
+  size: 1944234
+  hash: md5
+  path: glassdoor_jobs.csv
