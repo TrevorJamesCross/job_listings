@@ -1,1 +1,9 @@
+# do not track __pycache__ paths
+__pycache__/
+
+# do not track .secrets dir
 /.secrets
+
+# do not track the following file types
+*.csv
+*.swp

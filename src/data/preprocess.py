@@ -1,7 +1,7 @@
 """
 Job Listings: Preprocess
 Author: Trevor Cross
-Last Updated: 09/16/24
+Last Updated: 09/17/24
 
 Preprocess raw job listings data using an LLM to parse out ML input features.
 """
@@ -31,6 +31,9 @@ from data_toolbox import (
 # ---Read Raw Data---
 # -------------------
 
+# print progress to CLI
+print("\nReading input data...")
+
 # define CLI argument parser
 parser = argparse.ArgumentParser(description='read a CSV file from CLI')
 parser.add_argument('csv_file', type=str, help='path to the input CSV file')
@@ -44,6 +47,9 @@ df = pd.read_csv(args.csv_file)
 # ----------------
 # ---Clean Data---
 # ----------------
+
+# print progress to CLI
+print("\nCleaning input data...")
 
 # lowercase col names & replace spaces with underscores
 df.columns = df.columns.str.lower().str.replace(" ", "_")
@@ -70,6 +76,9 @@ df.reset_index(drop=True, inplace=True)
 # ----------------------------------------------
 # ---Parse Out Features from Job Descriptions---
 # ----------------------------------------------
+
+# print progress to CLI
+print("\nParsing features from job description column...")
 
 # define path to OpenAI key
 key_path = os.path.join(".secrets", "openai_creds.json")
@@ -107,11 +116,15 @@ df = pd.concat([df, df_req], axis=1)
 # drop cols & rows
 df.drop(columns=['job_description'], inplace=True)
 df = df[~df.isin([None, 'none' 'None']).any(axis=1)]
+df.dropna(inplace=True)
 df.reset_index(drop=True, inplace=True)
 
 # ------------------------------
 # ---Output Preprocessed Data---
 # ------------------------------
+
+# print progress to CLI
+print("\nOutputting preprocessed dataset...")
 
 # define output directory
 output_dir = os.path.join("data", "preprocessed")
