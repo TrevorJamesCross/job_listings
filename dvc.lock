@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py data/raw/glassdoor_jobs.csv
+    deps:
+    - path: data/raw/glassdoor_jobs.csv
+      hash: md5
+      md5: 084553e38852a0caa223890cf485dce5
+      size: 1944234
+    - path: src/data/preprocess.py
+      hash: md5
+      md5: 9f4a10e7b037f46399c9eca690cebea2
+      size: 3019
+    outs:
+    - path: data/preprocessed/glassdoor_jobs.csv
+      hash: md5
+      md5: 5bf2c70d5dd16e6bc6950db71939c547
+      size: 85581

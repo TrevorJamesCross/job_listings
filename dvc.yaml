@@ -1,0 +1,8 @@
+stages:
+  preprocess:
+    cmd: python src/data/preprocess.py data/raw/glassdoor_jobs.csv
+    deps:
+    - data/raw/glassdoor_jobs.csv
+    - src/data/preprocess.py
+    outs:
+    - data/preprocessed/glassdoor_jobs.csv
