@@ -9,10 +9,34 @@ stages:
       size: 1944234
     - path: src/data/preprocess.py
       hash: md5
-      md5: 9f4a10e7b037f46399c9eca690cebea2
-      size: 3019
+      md5: ff58edb1c78621edfdfeea4d470dc303
+      size: 3793
     outs:
     - path: data/preprocessed/glassdoor_jobs.csv
       hash: md5
-      md5: 5bf2c70d5dd16e6bc6950db71939c547
-      size: 85581
+      md5: 546aedc4ef0cf2b552ff896962ca98ce
+      size: 18901
+  train:
+    cmd: python src/models/train.py data/preprocessed/glassdoor_jobs.csv
+    deps:
+    - path: data/preprocessed/glassdoor_jobs.csv
+      hash: md5
+      md5: 546aedc4ef0cf2b552ff896962ca98ce
+      size: 18901
+    - path: src/models/train.py
+      hash: md5
+      md5: 6cdd1575316f1d17041abb346fd46557
+      size: 5837
+    outs:
+    - path: models/metrics_trn.json
+      hash: md5
+      md5: 5a30aa6637ce5bb9c096505b040abaf8
+      size: 128
+    - path: models/metrics_tst.json
+      hash: md5
+      md5: 609ce8ab4b981afab41a7e408be500ab
+      size: 127
+    - path: models/model.pkl
+      hash: md5
+      md5: 72b1e684a67a5b28522f3f282353c108
+      size: 176602

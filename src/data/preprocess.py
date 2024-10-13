@@ -1,7 +1,7 @@
 """
 Job Listings: Preprocess
 Author: Trevor Cross
-Last Updated: 09/17/24
+Last Updated: 10/13/24
 
 Preprocess raw job listings data using an LLM to parse out ML input features.
 """
@@ -16,7 +16,10 @@ import pandas as pd
 # import openai
 from openai import OpenAI
 
-# import support libraries
+# import concurrency libraries
+import concurrent.futures
+
+# import system/file libraries
 import argparse
 import os
 import json
@@ -96,22 +99,36 @@ client = OpenAI(
 model_name = 'gpt-4o-mini'
 
 # parse salary_estimate
-df['salary_estimate'] = df['salary_estimate'].apply(
-        lambda x: parse_salary(x, client, model_name)
-        )
-
-# collect description features into list
-list_dict = []
-for desc in df['job_description']:
-    list_dict.append(
-            extract_features(desc, client, model_name)
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    df['salary_estimate'] = list(
+            executor.map(
+                lambda est: parse_salary(
+                    est,
+                    client,
+                    model_name
+                    ),
+                df['salary_estimate'].values
+                )
             )
 
-# create DataFrame from extracted job requirements
-df_req = pd.DataFrame(list_dict)
+# collect description features into list
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    list_dict = list(
+            executor.map(
+                lambda desc: extract_features(
+                    desc,
+                    client,
+                    model_name
+                    ),
+                df['job_description'].values
+                )
+            )
+
+# create DataFrame from extracted features
+df_ext = pd.DataFrame(list_dict)
 
 # concat df w/ df_req
-df = pd.concat([df, df_req], axis=1)
+df = pd.concat([df, df_ext], axis=1)
 
 # drop cols & rows
 df.drop(columns=['job_description'], inplace=True)

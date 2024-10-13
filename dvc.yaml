@@ -1,3 +1,16 @@
+artifacts:
+  estimator:
+    path: models/models.pkl
+    type: model
+    desc: 'scikit-learn Pipeline with GradientBoostedRegressor as final \
+      estimator.'
+    meta:
+      framework: sklearn
+metrics:
+  - models/metrics_trn.json
+  - models/metrics_tst.json
+params:
+  - models/best_params.json
 stages:
   preprocess:
     cmd: python src/data/preprocess.py data/raw/glassdoor_jobs.csv
@@ -6,3 +19,12 @@ stages:
     - src/data/preprocess.py
     outs:
     - data/preprocessed/glassdoor_jobs.csv
+  train:
+    cmd: python src/models/train.py data/preprocessed/glassdoor_jobs.csv
+    deps:
+    - data/preprocessed/glassdoor_jobs.csv
+    - src/models/train.py
+    outs:
+    - models/model.pkl
+    - models/metrics_trn.json
+    - models/metrics_tst.json

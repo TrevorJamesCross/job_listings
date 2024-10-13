@@ -1,7 +1,7 @@
 """
 Job Listings: Data Toolbox
 Author: Trevor Cross
-Last Updated: 09/16/24
+Last Updated: 10/13/24
 
 Series of functions used to assist in manipulating raw data.
 """
@@ -20,15 +20,15 @@ Series of functions used to assist in manipulating raw data.
 def extract_features(string_description, openai_client, model_name):
 
     # define messages to model
-    system_content = "You are an assistant that responds in Python \
-            dictionary format. Return a Python dictionary with the \
-            following keys: 'skills' and 'edu_level'. \
-            Given a job description, extract all technical skills and tools \
-            mentioned. Also extract the education level (one of associate's, \
-            bachelor's, master's, or phd; take the lowest if more than one is \
-            listed) if it present. If it is not present, replace those return \
-            values with Python 'None' data type. Respond only with a \
-            Python dictionary."
+    system_content = "You are an assistant that responds in Python dictionary \
+            format. Return a Python dictionary with the following keys: \
+            'skills' and 'edu_level'. Given a job description, extract all \
+            programming languages and cloud services mentioned. Also extract \
+            the education level (one of associate's, bachelor's, master's, or \
+            phd; take the lowest if more than one is listed) if it present. \
+            If it is not present, replace those return values with Python \
+            'None' data type. Do not use 'null' or any other data type. \
+            Respond only with a Python dictionary."
 
     messages = [
             {
@@ -52,13 +52,15 @@ def extract_features(string_description, openai_client, model_name):
     try:
         # parse content into Python dict
         dict_content = eval(
-                content.replace("```", "").replace("python", "").strip()
+                content.replace("```python", "").replace("```", "").strip()
                 )
 
         # lowercase content values
-        dict_content['skills'] = [
-                val.lower() for val in dict_content['skills']
-                ]
+        if dict_content['skills'] is not None:
+            dict_content['skills'] = [
+                    val.lower() for val in dict_content['skills']
+                    ]
+
         if isinstance(dict_content['edu_level'], str):
             dict_content['edu_level'] = dict_content['edu_level'].lower()
         else:
@@ -67,10 +69,10 @@ def extract_features(string_description, openai_client, model_name):
         # return content
         return dict_content
 
-    except Exception:
+    except Exception as e:
         # return dict of None vals if parsing fails
-        # print(f"\nThe following description could not be parsed \
-        #        {string_description}")
+        print(f"\nThe following content could not be parsed: \n{content}")
+        print(f"\nFailed parsing reason: \n{e}")
         return {
                 'skills': None,
                 'edu_level': None

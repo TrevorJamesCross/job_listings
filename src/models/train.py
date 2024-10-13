@@ -1,7 +1,7 @@
 """
 Job Listings: Train Model
 Author: Trevor Cross
-Last Updated: 09/17/24
+Last Updated: 10/13/24
 
 Develop & tune model pipeline on preprocessed data.
 """
@@ -28,13 +28,18 @@ from sklearn.preprocessing import (
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingRegressor
 
-# import support libraries
+# import system/file libraries
 import argparse
 from tempfile import TemporaryDirectory
 from joblib import Memory
+import pickle
 
 # import toolbox functions
-from models_toolbox import transform_skills
+from models_toolbox import (
+        transform_skills,
+        eval_metrics,
+        dict_to_json
+        )
 
 # ------------------------------------
 # ---Read & Split Preprocessed Data---
@@ -169,8 +174,8 @@ with TemporaryDirectory() as temp_dir:
 
     # define search grid params
     param_grid = {
-            'estimator__n_estimators': np.arange(100, 600, 400),
-            'estimator__learning_rate': np.arange(0.05, 0.25, 0.15),
+            'estimator__n_estimators': np.linspace(50, 150, 5, dtype=int),
+            'estimator__learning_rate': np.linspace(.02, .04, 5, dtype=float)
             }
     grid = GridSearchCV(
             pipe,
@@ -178,7 +183,7 @@ with TemporaryDirectory() as temp_dir:
             scoring='neg_mean_squared_error',
             refit=True,
             n_jobs=-1,
-            cv=2
+            cv=7
             )
 
     # tune model
@@ -192,11 +197,23 @@ with TemporaryDirectory() as temp_dir:
 print("\nEvaluating best model...")
 
 # get best model
-best_model = grid.best_estimator_
+best_pipe = grid.best_estimator_
+best_params = grid.best_params_
+best_params['estimator__n_estimators'] = int(
+        best_params['estimator__n_estimators']
+        )
 
 # evaluate training data
+metrics_trn = eval_metrics(
+        y_trn,
+        best_pipe.predict(X_trn)
+        )
 
 # evaluate test data
+metrics_tst = eval_metrics(
+        y_tst,
+        best_pipe.predict(X_tst)
+        )
 
 # ----------------------------
 # ---Output Model & Metrics---
@@ -205,8 +222,25 @@ best_model = grid.best_estimator_
 # print progress to CLI
 print("\nOutputting model & metrics...")
 
-# define artifacts dir path
-
 # output model
+pickle.dump(
+        best_pipe,
+        open("models/model.pkl", "wb")
+        )
+
+# output model parameters
+dict_to_json(
+        best_params,
+        "models/best_params.json"
+        )
 
 # output metrics
+dict_to_json(
+        metrics_trn,
+        "models/metrics_trn.json"
+        )
+
+dict_to_json(
+        metrics_tst,
+        "models/metrics_tst.json"
+        )
